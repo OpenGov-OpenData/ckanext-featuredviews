@@ -18,6 +18,6 @@ Add to the list of plugins: ::
     ckan.plugins = ... featuredviews
 
 
-Run the migrations: ::
+If migrating from CKAN 2.2 to 2.3, then run this line, which will target your development.ini configuration file: ::
 
     paster --plugin=ckanext-featuredviews featured migrate
