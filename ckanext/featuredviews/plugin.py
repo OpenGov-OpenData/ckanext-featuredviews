@@ -1,16 +1,18 @@
-import db
-import actions
 import ckan.model as model
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.dictization.model_dictize as md
 
+from ckan.common import config
 from ckan.lib.dictization import table_dictize
+from ckanext.featuredviews import db, actions
 
-try:
-    from ckan.common import config
-except ImportError:
-    from pylons import config
+from packaging.version import Version
+
+
+def version_builder(text_version):
+    return Version(text_version)
+
 
 class FeaturedviewsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
@@ -42,7 +44,8 @@ class FeaturedviewsPlugin(plugins.SingletonPlugin):
             'get_featured_view': _get_featured_view,
             'get_canonical_resource_view': _get_canonical_view,
             'get_homepage_resource_views': _get_homepage_views,
-            'display_homepage_views': _display_homepage_views
+            'display_homepage_views': _display_homepage_views,
+            'version': version_builder
         }
         return helpers
 

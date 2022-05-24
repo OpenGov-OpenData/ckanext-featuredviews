@@ -1,0 +1,13 @@
+featured_js:
+  filters: rjsmin
+  output: ckanext-featuredviews/%(version)s_featured.js
+  extra:
+    preload:
+      - base/main
+  contents:
+    - js/featured.js
+
+featured_css:
+  output: ckanext-featuredviews/%(version)s_featured.css
+  contents:
+    - css/featured.css

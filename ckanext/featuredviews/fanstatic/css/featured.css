@@ -1,0 +1,9 @@
+.resource-view {
+    border-top: 1px dotted rgb(221, 221, 221);
+    margin-bottom: 20px;
+}
+
+.resource-view .actions,
+.resource-view a[data-module="resource-view-embed"] {
+    display: none;
+}
