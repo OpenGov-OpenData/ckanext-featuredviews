@@ -1,37 +1,42 @@
+{% set ckan_29_or_higher = h.version(h.ckan_version()) > h.version('2.9') %}
+
+{% set snippet_type = 'asset' if ckan_29_or_higher else 'resource' %}
+{% snippet 'featuredviews/snippets/featuredviews_' ~ snippet_type ~ '.html', name='featured/featured_js' %}
+
+{% set resource_read_route = 'resource.read' if ckan_29_or_higher else 'resource_read' %}
+
 {% set views_created = views or resource_preview %}
 {% if views_created %}
   <ul class="nav nav-tabs {{ extra_class }}" {{ extra_attributes }}>
     {% if resource_preview %}
       <li{% if not view_id %} class="active"{% endif %}>
-        <a href="{{ h.url_for(controller='package', action='resource_read', id=pkg.name, resource_id=resource.id) }}" >
+        <a href="{{ h.url_for(resource_read_route, id=pkg.name, resource_id=resource.id) }}" >
           <i class="icon-eye-open fa fa-eye-open"></i>
           {{ _("Resource Preview") }}
         </a>
       </li>
-  {% endif %}
+    {% endif %}
 
-  {% set current_filters = request.str_GET.get('filters') %}
-  {% for view in views %}
-  	{% set is_selected = true if view_id == view.id else false %}
-    {% snippet "package/snippets/resource_views_list_item_featured.html",
-       view=view,
-       pkg=pkg,
-       is_edit=is_edit,
-       is_selected=is_selected,
-       current_filters=current_filters
-    %}
-  {% endfor %}
+    {% set current_filters = request.args.get('filters') if ckan_29_or_higher else request.str_GET.get('filters') %}
+    {% for view in views %}
+      {% set is_selected = true if view_id == view.id else false %}
+      {% snippet "package/snippets/resource_views_list_item_featured.html",
+         view=view,
+         pkg=pkg,
+         is_edit=is_edit,
+         is_selected=is_selected,
+         current_filters=current_filters
+      %}
+    {% endfor %}
 
-  {% if h.check_access('package_update', {'id':pkg.id }) and view_id %}
-    {% set featured = h.get_featured_view(view_id) %}
-    <div style="float:right; display:inline-block;">
-      <button id="canonical" type="button" class="btn btn-default {{ 'active' if featured.canonical }}">{{_("Canonical View")}}</button>
-      {% if h.display_homepage_views() %}
-        <button id="homepage" type="button" class="btn btn-warning {{ 'active' if featured.homepage }}">{{_("Show on Home Page")}}</button>
-      {% endif %}
-    </div>
-  {% endif %}
-</ul>
+    {% if h.check_access('package_update', {'id':pkg.id }) and view_id %}
+      {% set featured = h.get_featured_view(view_id) %}
+      <div style="float:right; display:inline-block;">
+        <button id="canonical" type="button" class="btn btn-default {{ 'active' if featured.canonical }}">{{_("Canonical View")}}</button>
+        {% if h.display_homepage_views() %}
+          <button id="homepage" type="button" class="btn btn-warning {{ 'active' if featured.homepage }}">{{_("Show on Home Page")}}</button>
+        {% endif %}
+      </div>
+    {% endif %}
+  </ul>
 {% endif %}
-
-{% resource 'featured/js/featured.js' %}

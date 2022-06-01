@@ -1,27 +1,36 @@
-import db
-import actions
 import ckan.model as model
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.dictization.model_dictize as md
 
+from ckan.common import config
 from ckan.lib.dictization import table_dictize
 
-try:
-    from ckan.common import config
-except ImportError:
-    from pylons import config
+import ckanext.featuredviews.actions as actions
+import ckanext.featuredviews.db as db
+from ckanext.featuredviews.commands import cli
+
+from packaging.version import Version
+
+
+def version_builder(text_version):
+    return Version(text_version)
+
 
 class FeaturedviewsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IActions, inherit=True)
     plugins.implements(plugins.ITemplateHelpers, inherit=True)
     plugins.implements(plugins.IConfigurable, inherit=True)
+    if toolkit.check_ckan_version(min_version='2.9.0'):
+        plugins.implements(plugins.IClick)
+
+        def get_commands(self):
+            return cli.get_commands()
 
     # IConfigurable
     def configure(self, config):
-        if model.repo.are_tables_created() and not db.featured_table.exists():
-            db.featured_table.create()
+        db.setup()
 
     # IConfigurer
     def update_config(self, config_):
@@ -42,7 +51,8 @@ class FeaturedviewsPlugin(plugins.SingletonPlugin):
             'get_featured_view': _get_featured_view,
             'get_canonical_resource_view': _get_canonical_view,
             'get_homepage_resource_views': _get_homepage_views,
-            'display_homepage_views': _display_homepage_views
+            'display_homepage_views': _display_homepage_views,
+            'version': version_builder
         }
         return helpers
 

@@ -1,5 +1,13 @@
 {% ckan_extends %}
 
+{% set ckan_29_or_higher = h.version(h.ckan_version()) > h.version('2.9') %}
+{% set snippet_type = 'asset' if ckan_29_or_higher else 'resource' %}
+
+{% block styles %}
+    {{ super() }}
+    {% snippet 'featuredviews/snippets/featuredviews_' ~ snippet_type ~ '.html', name='featured/featured_css' %}
+{% endblock %}
+
 {% block package_notes %}
     {{ super() }}
 

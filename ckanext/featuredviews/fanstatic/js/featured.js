@@ -17,7 +17,7 @@ $(document).ready(function(){
             data: encodeURIComponent(JSON.stringify(data)),
             url: endpoint + 'featured_upsert',
         }).done(function(result){
-            if (result['result'][canonical_or_homepage] === 'True'){
+            if (result['result'][canonical_or_homepage] === 'True' || result['result'][canonical_or_homepage] === true){
                 el.addClass('active');
             } else {
                 el.removeClass('active');
