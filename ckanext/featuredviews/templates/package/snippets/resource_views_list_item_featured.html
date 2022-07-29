@@ -1,18 +1,25 @@
 {% set ckan_29_or_higher = h.version(h.ckan_version()) > h.version('2.9') %}
 
-{% if is_edit %}
-  {% set named_route = 'resource.edit_view' if ckan_29_or_higher else 'edit_view' %}
+{% if ckan_29_or_higher %}
+  {% set action = 'resource.edit_view' if is_edit else 'resource.read' %}
+  {% if current_filters %}
+    {% set url = h.url_for(action, id=pkg.name,
+                           resource_id=view.resource_id, view_id=view.id,
+                           filters=current_filters) %}
+  {% else %}
+    {% set url = h.url_for(action, id=pkg.name,
+                           resource_id=view.resource_id, view_id=view.id) %}
+  {% endif %}
 {% else %}
-  {% set named_route = 'resource.read' if ckan_29_or_higher else 'resource_read' %}
-{% endif %}
-
-{% if current_filters %}
-  {% set url = h.url_for(named_route, id=pkg.name,
-                         resource_id=view.resource_id, view_id=view.id,
-                         filters=current_filters) %}
-{% else %}
-  {% set url = h.url_for(named_route, id=pkg.name,
-                         resource_id=view.resource_id, view_id=view.id) %}
+  {% set action = 'edit_view' if is_edit else 'resource_read' %}
+  {% if current_filters %}
+    {% set url = h.url_for(controller='package', action=action, id=pkg.name,
+                           resource_id=view.resource_id, view_id=view.id,
+                           filters=current_filters) %}
+  {% else %}
+    {% set url = h.url_for(controller='package', action=action, id=pkg.name,
+                           resource_id=view.resource_id, view_id=view.id) %}
+  {% endif %}
 {% endif %}
 
 <li {% if is_selected %}class="active view_item"{% endif %} data-id="{{ view.id }}">
