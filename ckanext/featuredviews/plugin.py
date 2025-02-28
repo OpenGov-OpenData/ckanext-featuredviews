@@ -1,3 +1,5 @@
+import logging
+
 import ckan.model as model
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
@@ -11,6 +13,9 @@ import ckanext.featuredviews.db as db
 from ckanext.featuredviews.commands import cli
 
 from packaging.version import Version
+
+
+log = logging.getLogger(__name__)
 
 
 def version_builder(text_version):
@@ -65,32 +70,40 @@ def _get_featured_view(resource_view_id):
     return featured
 
 def _get_canonical_view(package_id):
-    canonical_view_ids = [
-        view.resource_view_id for view in db.Featured.find(package_id=package_id, canonical=True).all()
-    ]
+    canonical_view = {}
+    try:
+        canonical_view_ids = [
+            view.resource_view_id for view in db.Featured.find(package_id=package_id, canonical=True).all()
+        ]
+        if not canonical_view_ids:
+            return None
 
-    if not canonical_view_ids:
-        return None
+        resource_views = model.Session.query(model.ResourceView).filter(
+            model.ResourceView.id.in_(canonical_view_ids)
+        ).all()
+        if not resource_views:
+            return None
 
-    resource_views = model.Session.query(model.ResourceView).filter(
-        model.ResourceView.id.in_(canonical_view_ids)
-    ).all()
+        for view in resource_views:
+            resource_view = md.resource_view_dictize(view, {'model': model})
+            if not resource_view.get('resource_id'):
+                continue
 
-    if resource_views is None:
-        return None
-    
-    for view in resource_views:
-        resource_view = md.resource_view_dictize(view, {'model': model})
-        resource_obj = model.Resource.get(resource_view['resource_id'])
+            resource_obj = model.Resource.get(resource_view['resource_id'])
+            if resource_obj.state == 'deleted':
+                continue
 
-        if resource_obj.state == 'deleted':
-            continue
+            resource = md.resource_dictize(resource_obj, {'model': model})
+            if not resource:
+                continue
 
-        resource = md.resource_dictize(resource_obj, {'model': model})
-
-        return {'resource': resource, 'resource_view': resource_view}
-
-    return None
+            canonical_view = {
+                'resource': resource,
+                'resource_view': resource_view
+            }
+    except Exception as e:
+        log.exception('Unable to get canonical view for package %s', package_id)
+    return canonical_view
 
 def _get_homepage_views():
     homepage_view_ids = [
@@ -105,10 +118,10 @@ def _get_homepage_views():
     for view in resource_views:
         resource_view = md.resource_view_dictize(view, {'model': model})
         resource_obj = model.Resource.get(resource_view['resource_id'])
-        
+
         if resource_obj.state == 'deleted':
             continue
-        
+
         resource = md.resource_dictize(resource_obj, {'model': model})
 
         homepage_views.append({
