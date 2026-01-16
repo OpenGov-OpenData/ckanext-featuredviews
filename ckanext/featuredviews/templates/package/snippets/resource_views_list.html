@@ -5,6 +5,19 @@
 
 {% set views_created = views or resource_preview %}
 {% if views_created %}
+  {% if h.check_access('package_update', {'id':pkg.id }) and view_id %}
+    {% set featured = h.get_featured_view(view_id) %}
+    <div style="float:right; display:inline-block;">
+      {% if featured.canonical %}
+        <button id="canonical" type="button" class="btn btn-default active">{{_("Current Canonical View")}}</button>
+      {% else %}
+        <button id="canonical" type="button" class="btn btn-default">{{_("Set as Canonical View")}}</button>
+      {% endif %}
+      {% if h.display_homepage_views() %}
+        <button id="homepage" type="button" class="btn btn-warning {{ 'active' if featured.homepage }}">{{_("Show on Home Page")}}</button>
+      {% endif %}
+    </div>
+  {% endif %}
   <ul class="nav nav-tabs {{ extra_class }}" {{ extra_attributes }}>
     {% if resource_preview %}
       <li{% if not view_id %} class="active"{% endif %}>
@@ -32,14 +45,5 @@
       %}
     {% endfor %}
 
-    {% if h.check_access('package_update', {'id':pkg.id }) and view_id %}
-      {% set featured = h.get_featured_view(view_id) %}
-      <div style="float:right; display:inline-block;">
-        <button id="canonical" type="button" class="btn btn-default {{ 'active' if featured.canonical }}">{{_("Canonical View")}}</button>
-        {% if h.display_homepage_views() %}
-          <button id="homepage" type="button" class="btn btn-warning {{ 'active' if featured.homepage }}">{{_("Show on Home Page")}}</button>
-        {% endif %}
-      </div>
-    {% endif %}
   </ul>
 {% endif %}
