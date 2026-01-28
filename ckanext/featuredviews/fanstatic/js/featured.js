@@ -22,6 +22,15 @@ $(document).ready(function(){
             } else {
                 el.removeClass('active');
             }
+            // Update canonical button text when toggled
+            if (canonical_or_homepage === 'canonical') {
+                var labelActive = el.data('label-active');
+                var labelInactive = el.data('label-inactive');
+                if (labelActive && labelInactive) {
+                    el.text(result['result'][canonical_or_homepage] === 'True' || result['result'][canonical_or_homepage] === true
+                        ? labelActive : labelInactive);
+                }
+            }
         });
     });
 });

@@ -8,11 +8,11 @@
   {% if h.check_access('package_update', {'id':pkg.id }) and view_id %}
     {% set featured = h.get_featured_view(view_id) %}
     <div style="float:right; display:inline-block;">
-      {% if featured.canonical %}
-        <button id="canonical" type="button" class="btn btn-default active">{{_("Current Canonical View")}}</button>
-      {% else %}
-        <button id="canonical" type="button" class="btn btn-default">{{_("Set as Canonical View")}}</button>
-      {% endif %}
+      <button id="canonical" type="button" class="btn btn-default {{ 'active' if featured.canonical }}"
+        data-label-active="{{ _('Current Canonical View') }}"
+        data-label-inactive="{{ _('Set as Canonical View') }}">
+        {{ _('Current Canonical View') if featured.canonical else _('Set as Canonical View') }}
+      </button>
       {% if h.display_homepage_views() %}
         <button id="homepage" type="button" class="btn btn-warning {{ 'active' if featured.homepage }}">{{_("Show on Home Page")}}</button>
       {% endif %}
